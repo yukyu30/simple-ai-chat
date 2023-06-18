@@ -17,31 +17,23 @@ const MessageForm = (props: MessageFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!value.trim()) return;
-
+    console.log('Sending message:', value);
     // 送信したメッセージを表示
     props.addMessage({ role: 'user', content: value });
     setValue('');
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ content: value }),
-    })
-      .then((response) => {
-        console.log(response);
-        return response.json();
-      })
-      .catch((error) => {
-        console.error('Error sending message:', error);
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: value }),
       });
-
-    // サーバーからのレスポンスメッセージを表示
-    console.log(response.content);
-    props.addMessage({
-      role: 'assistant',
-      content: response.content,
-    });
+      const data = await response.json();
+      props.addMessage(data.message);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
